@@ -24,6 +24,8 @@
 #ifndef FATFS_H
 #define FATFS_H
 
+#define BUFFER_SIZE_MAX 1024
+
 #include <Arduino.h>
 #ifdef ESP8266
   #include <SD.h>
@@ -112,6 +114,8 @@ public:
   bool     seekSet( uint32_t cur );
 
   uint32_t fileSize();
+
+  uint32_t copyFile();
   
 private:
   FIL      ffile;

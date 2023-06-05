@@ -22,6 +22,7 @@
  */
   
 #include "FatFs.h"
+#include "diskio.h"
 
 #ifdef ESP8266
   Sd2Card card;
@@ -527,6 +528,42 @@ bool FileFs::seekSet( uint32_t cur )
 uint32_t FileFs::fileSize()
 {
   return f_size( & ffile );
+}
+
+// Copy the file to another destination
+//   path: specified path for copied file
+// Return true if file copied successfully,
+//   false if read/write failed
+
+bool FileFs::copyFile(char* path)
+{
+    FIL destFile;
+    f_open(& destFile, path, FA_CREATE_ALWAYS | FA_WRITE);
+
+    BYTE buffer[BUFFER_SIZE_MAX];
+    UINT bytesRead, bytesWrite;
+    FRESULT res;
+
+    for(;;)
+    {
+        res = f_read(& ffile, buffer, BUFFER_SIZE_MAX, & bytesRead);
+        if ( res != FR_OK  || bytesRead == 0 )
+        {
+            return false;
+            break;
+        }
+
+        res = f_write(& destFile, buffer, bytesRead, & bytesWrite);
+        if ( res != FR_OK || bytesWrite < bytesRead )
+        {
+            return false;
+            break;
+        }
+
+    }
+
+    f_close(& destFile);
+    return true;
 }
 
 FatFsClass FatFs;
